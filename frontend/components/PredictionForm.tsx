@@ -21,6 +21,8 @@ const formFields = [
   { name: "Longitude", label: "Longitude" },
 ];
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function PredictionForm({
   onPredictionResult,
 }: PredictionFormProps) {
@@ -33,15 +35,20 @@ export default function PredictionForm({
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch("/api/predict", {
+      const response = await fetch(`${API_BASE_URL}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
-      const result = await response.json();
-      onPredictionResult(result);
+      const data = await response.json();
+
+      if (data && data.prediction !== undefined) {
+        onPredictionResult(data.prediction);
+      } else {
+        console.error("Invalid response:", data);
+      }
     } catch (error) {
       console.error("Error:", error);
     } finally {
